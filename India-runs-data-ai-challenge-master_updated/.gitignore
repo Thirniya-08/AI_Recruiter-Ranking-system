@@ -1,0 +1,17 @@
+# Exclude large data files
+RedrobAI/Hackathon/ProjectObjective/candidates.jsonl
+RedrobAI/Hackathon/ProjectObjective/candidates.jsonl.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+.env

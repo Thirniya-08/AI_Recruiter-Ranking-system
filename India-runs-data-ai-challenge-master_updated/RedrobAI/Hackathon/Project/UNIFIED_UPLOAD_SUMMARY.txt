@@ -1,0 +1,464 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                    🎉 UNIFIED UPLOAD FEATURE COMPLETE! 🎉                    ║
+║                                                                              ║
+║              Upload Candidates + Job Description in ONE File                ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+✨ WHAT'S NEW
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ SINGLE-FILE UPLOAD WORKFLOW                                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ Before: 2-Step Process                                                       │
+│   Step 1: Upload JD              ──┐                                        │
+│   Step 2: Upload Candidates      ──┤  Rank                                   │
+│                                    │                                        │
+│ After: 1-Step Process                                                        │
+│   Upload Combined File ──> Auto-Extract JD & Candidates ──> Rank!           │
+│                                                                              │
+│ Supported Formats:                                                           │
+│   • ZIP (recommend for multiple files)                                       │
+│   • JSON (best for API/programmatic)                                         │
+│   • Excel XLSX (familiar, manual entry)                                      │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+
+📦 SUPPORTED FILE FORMATS
+
+
+1️⃣ ZIP ARCHIVE (Recommended)
+   ────────────────────────────────────────────────────────────────────────────
+   
+   Structure:
+   └─ archive.zip
+      ├─ job_description.pdf     (JD file - auto-detected)
+      ├─ candidates.jsonl        (Candidate data)
+      └─ more_candidates.csv     (Optional - additional candidates)
+   
+   Advantages:
+   ✓ Most flexible - combine any formats
+   ✓ Multiple candidate files
+   ✓ JD auto-detection
+   ✓ Clear separation of data
+   
+   When to use:
+   • Multiple candidate sources
+   • Different file types
+   • Complex data structures
+   
+   Create ZIP:
+   └─ zip recruitment.zip jd.pdf candidates.jsonl
+
+
+2️⃣ JSON FILE (Best for APIs)
+   ────────────────────────────────────────────────────────────────────────────
+   
+   Structure:
+   {
+     "job_description": "Senior Engineer role...",
+     "candidates": [
+       {"name": "Alice", "skills": ["Python", "ML"], ...},
+       {"name": "Bob", "skills": ["Python", "Go"], ...}
+     ]
+   }
+   
+   Advantages:
+   ✓ Single file
+   ✓ Easy to generate programmatically
+   ✓ API-friendly
+   
+   When to use:
+   • Integrating with other systems
+   • Programmatic generation
+   • APIs and scripts
+
+
+3️⃣ EXCEL WORKBOOK (.xlsx or .xls)
+   ────────────────────────────────────────────────────────────────────────────
+   
+   Structure:
+   └─ workbook.xlsx
+      ├─ Sheet 1: Job Description (text content)
+      ├─ Sheet 2: Candidates (with headers)
+      └─ Sheet 3: More Candidates (optional)
+   
+   Advantages:
+   ✓ Familiar format
+   ✓ Easy to edit manually
+   ✓ Multiple sheets for candidates
+   
+   When to use:
+   • HR system exports
+   • Manual data entry
+   • ATS integrations
+
+
+🚀 QUICK START
+
+
+STEP 1: Prepare Your Data
+─────────────────────────
+
+Option A: ZIP
+  zip -r recruitment.zip jd.pdf candidates.jsonl
+
+Option B: JSON
+  {
+    "job_description": "Senior Engineer...",
+    "candidates": [...]
+  }
+
+Option C: Excel
+  Sheet 1: JD text
+  Sheet 2: Candidates (with headers)
+
+
+STEP 2: Upload
+──────────────
+
+curl -X POST http://127.0.0.1:8000/api/unified-upload \
+  -F "file=@recruitment.zip" \
+  --data-urlencode "auto_rank=true"
+
+
+STEP 3: Get Results
+────────────────────
+
+Response:
+{
+  "success": true,
+  "job_title": "Senior AI Engineer",
+  "total_candidates": 1000,
+  "valid_candidates": 950,
+  "candidates_ranked": true,
+  "message": "Unified upload successful!"
+}
+
+
+STEP 4: View Rankings
+──────────────────────
+
+curl -X POST http://127.0.0.1:8000/api/rank-with-jd \
+  -H "Content-Type: application/json" \
+  -d '{"top_n": 100}'
+
+
+🎯 WHAT HAPPENS AUTOMATICALLY
+
+When you upload a unified file:
+
+1. File Parsing
+   ├─ Detects format (ZIP, JSON, Excel)
+   ├─ Extracts raw content
+   └─ Validates structure
+
+2. JD Processing
+   ├─ Identifies JD from file
+   ├─ Extracts job title, company, experience
+   ├─ Identifies required skills
+   └─ Categorizes skills (must-have, nice-to-have, preferred)
+
+3. Candidate Processing
+   ├─ Extracts candidate data
+   ├─ Standardizes format
+   ├─ Detects honeypot profiles
+   └─ Counts totals
+
+4. Auto-Ranking (optional)
+   ├─ Scores each candidate
+   ├─ Applies recruiter preferences
+   ├─ Filters based on criteria
+   └─ Returns ranked results
+
+
+📊 RESPONSE STRUCTURE
+
+
+Success Response:
+{
+  "success": true,
+  "job_title": "Senior AI Engineer",
+  "company": "TechCorp",
+  "experience_required": 5,
+  "must_have_skills": 7,
+  "nice_to_have_skills": 5,
+  "preferred_skills": 3,
+  "total_candidates": 1000,
+  "valid_candidates": 950,
+  "honeypots": 50,
+  "file_type": "zip",
+  "message": "Unified upload successful!",
+  "candidates_ranked": true
+}
+
+
+⚡ PERFORMANCE EXPECTATIONS
+
+File Size          Format    Processing Time
+────────────────────────────────────────────
+Small  (< 1K)      ZIP       < 10 seconds
+Small  (< 1K)      JSON      < 5 seconds
+Medium (1K-10K)    ZIP       30-60 seconds
+Medium (1K-10K)    Excel     45-90 seconds
+Large  (10K+)      ZIP       2-5 minutes
+
+
+🔧 AUTOMATIC DATA TRANSFORMATION
+
+The system automatically converts different candidate formats:
+
+Input CSV:
+  name,title,experience,skills,location
+  Alice,Engineer,8,"Python,Go",SF
+
+→ Converted to Standard Format:
+  {
+    "candidate_id": "CAND_001",
+    "profile": {
+      "anonymized_name": "Alice",
+      "current_title": "Engineer",
+      "years_of_experience": 8,
+      "location": "SF"
+    },
+    "skills": ["Python", "Go"]
+  }
+
+
+📁 NEW FILES CREATED
+
+unified_uploader.py
+  ├─ Smart file format detector
+  ├─ ZIP parser
+  ├─ JSON parser
+  ├─ Excel parser
+  └─ Data transformation logic
+
+UNIFIED_UPLOAD_GUIDE.md
+  ├─ Complete documentation
+  ├─ Format specifications
+  ├─ Usage examples
+  └─ Best practices
+
+unified_upload_examples.py
+  ├─ Sample ZIP creator
+  ├─ Sample JSON creator
+  ├─ API test examples
+  └─ Python demonstrations
+
+
+🔗 NEW API ENDPOINTS
+
+POST /api/unified-upload
+  Parameters:
+    file (required): ZIP, JSON, or Excel file
+    auto_rank (optional, default=true): Auto-rank candidates
+  
+  Returns:
+    Complete upload status with JD info
+
+GET /api/unified-upload/formats
+  Returns:
+    Supported format information and examples
+
+
+💡 USAGE EXAMPLES
+
+
+Example 1: Simple JSON (5 seconds to results)
+─────────────────────────────────────────────
+
+1. Create data.json:
+   {
+     "job_description": "Senior Engineer...",
+     "candidates": [
+       {"name": "Alice", "experience": 8, "skills": ["Python"]},
+       {"name": "Bob", "experience": 6, "skills": ["Go"]}
+     ]
+   }
+
+2. Upload:
+   curl -X POST http://127.0.0.1:8000/api/unified-upload \
+     -F "file=@data.json"
+
+3. Done! Results ready.
+
+
+Example 2: ZIP from Multiple Sources
+───────────────────────────────────────
+
+1. Prepare files:
+   - jd_from_recruiter.pdf
+   - candidates_from_ats.jsonl
+   - more_candidates.csv
+
+2. Create ZIP:
+   zip sources.zip *.pdf *.jsonl *.csv
+
+3. Upload:
+   curl -X POST http://127.0.0.1:8000/api/unified-upload \
+     -F "file=@sources.zip"
+
+4. Auto-ranked in minutes!
+
+
+Example 3: Excel from HR System
+────────────────────────────────
+
+1. Create workbook:
+   Sheet 1: JD (copy from HR system)
+   Sheet 2: Candidates (export from ATS)
+
+2. Upload:
+   curl -X POST http://127.0.0.1:8000/api/unified-upload \
+     -F "file=@hr_export.xlsx"
+
+3. Instant rankings!
+
+
+✅ AUTOMATIC DETECTION
+
+JD Detection (in ZIP):
+  Priority order:
+  1. Files named: jd.*, job_description.*, description.*
+  2. First PDF or DOCX found
+  3. First TXT found
+
+Candidate Detection:
+  • All non-JD files in ZIP
+  • Supports: JSONL, JSON, CSV formats
+
+Field Mapping:
+  • System maps common field names automatically
+  • Supports variations: name/full_name, title/current_title, etc.
+
+
+🎛️ API PARAMETERS
+
+POST /api/unified-upload
+  
+  file: UploadFile (REQUIRED)
+    Accepted: ZIP, JSON, XLSX, XLS
+    Max size: 600MB
+  
+  auto_rank: bool (OPTIONAL, default=true)
+    true:  Automatically ranks candidates
+    false: Skip ranking, just parse and load
+
+
+🌟 KEY BENEFITS
+
+1. ⚡ SPEED
+   • One upload instead of two
+   • Automatic parsing
+   • Instant results
+
+2. 🎯 SIMPLICITY
+   • One API endpoint
+   • Multiple format support
+   • Auto-detection logic
+
+3. 🔄 FLEXIBILITY
+   • ZIP: Multiple sources
+   • JSON: Programmatic
+   • Excel: Manual entry
+
+4. 🤖 AUTOMATION
+   • Auto-extract skills
+   • Auto-detect honeypots
+   • Auto-rank candidates
+
+5. 📊 INTELLIGENCE
+   • Smart data mapping
+   • Format transformation
+   • Quality detection
+
+
+🚀 WORKFLOW
+
+
+Traditional (Separate Uploads):
+  ┌─────────────┐     ┌─────────────┐
+  │ Upload JD   │ --> │ Upload Cand  │ --> [ Rank ]
+  └─────────────┘     └─────────────┘
+       5 min              10 min           5 min
+    ────────────────────────────────────────────
+         Total: 20 minutes
+
+
+Unified (Single Upload):
+  ┌──────────────────────────┐
+  │ Upload Combined File     │ --> [ Auto-Rank ]
+  └──────────────────────────┘
+         5 min                    5 min
+    ──────────────────────────────────
+         Total: 10 minutes (50% faster!)
+
+
+🛠️ TROUBLESHOOTING
+
+
+Error: "No candidate data found in ZIP"
+  → Add JSONL or CSV file to ZIP
+
+Error: "No job description found in ZIP"
+  → Add PDF, DOCX, or TXT file named with 'jd' or 'description'
+
+Error: "'job_description' field not found in JSON"
+  → Use correct key: "job_description" or "jd"
+
+Error: "Excel must have at least 2 sheets"
+  → Add candidates to sheet 2+
+
+Error: Invalid candidate format
+  → System auto-converts, ensure basic fields present
+
+
+📚 DOCUMENTATION
+
+Read these files (in order):
+
+1. THIS FILE - Overview & quick start
+2. UNIFIED_UPLOAD_GUIDE.md - Complete guide with examples
+3. unified_upload_examples.py - Running examples with code
+
+
+🔗 ALL ENDPOINTS
+
+Unified Upload:
+  POST /api/unified-upload
+  GET  /api/unified-upload/formats
+
+Job Description:
+  POST /api/jd/upload
+  GET  /api/jd/summary
+  POST /api/jd/clear
+
+Ranking:
+  POST /api/rank-with-jd
+  POST /api/rank
+  POST /api/candidate-match-score
+
+Preferences:
+  POST /api/preferences/set
+  POST /api/preferences/strategy/{name}
+  GET  /api/preferences/strategies
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    🎉 ONE-FILE HIRING IS HERE! 🎉
+
+              Just upload ONE file with both your Job Description
+                    and Candidates - instant rankings!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Ready to try it? 
+  1. Run: python unified_upload_examples.py
+  2. Read: UNIFIED_UPLOAD_GUIDE.md
+  3. Upload your data!

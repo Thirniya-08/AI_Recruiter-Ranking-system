@@ -1,0 +1,4 @@
+/* Placeholder fonts stylesheet to avoid external Google Fonts requests.
+   Replace with local @font-face rules and font files for better typography. */
+:root { --ui-font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+body { font-family: var(--ui-font-stack); }

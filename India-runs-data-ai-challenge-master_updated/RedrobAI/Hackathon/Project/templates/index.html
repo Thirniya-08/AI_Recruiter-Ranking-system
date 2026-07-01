@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redrob AI — Candidate Ranking Dashboard</title>
+    <!-- Fonts: vendorized to avoid external requests (replace with real local fonts if desired) -->
+    <link rel="stylesheet" href="/static/vendor/fonts.css">
+    <link rel="stylesheet" href="/static/styles.css?v=reference-sections-ui-3">
+    <!-- Vendorized JS: load local copies to avoid CDN calls -->
+</head>
+<body>
+    <!-- Top Nav -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <span class="brand-glow"></span>
+                <span class="brand-text">redrob<span class="accent">.ai</span></span>
+                <span class="badge">Candidate Ranker</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">Dashboard</a>
+                <a href="https://redrob.io" target="_blank" class="nav-link">About Redrob</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- Hero section -->
+        <section class="hero-section">
+            <h1 class="hero-title">Intelligent Candidate Discovery & Ranking</h1>
+        </section>
+
+        <!-- NEW: Validation Section -->
+        <div id="validation-report-container" class="validation-report-container" style="display: none;">
+            <div class="validation-card validation-summary-card">
+                <h3 class="section-title">
+                    📊 Candidate Ranking Validation
+                </h3>
+                <div class="metrics-overview-banner">
+                    <strong>Metrics Overview</strong>
+                    <span>Comparing reference dataset vs model ranked top 100 candidates</span>
+                </div>
+                <table class="validation-summary-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Reference Dataset</th>
+                            <th>Model Ranked Top 100</th>
+                            <th>Difference</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="custom-summary-table-body">
+                        <!-- Dynamic rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="validation-card validation-detail-card">
+                <h3 class="section-title">
+                    🔍 Detailed Statistical Distribution
+                </h3>
+                <div id="custom-detailed-stats" class="validation-detail-content">
+                    <!-- Dynamic details -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Side: Control & Upload Panel -->
+            <div class="panel-left">
+                <!-- Upload Panel -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2>Upload Dataset / Resumes</h2>
+                        <button id="clear-btn" class="btn btn-secondary btn-sm" title="Clear all candidates">Reset</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="dropzone" class="dropzone">
+                            <input type="file" id="file-input" accept=".json,.jsonl,.jsonl.gz,.pdf,.docx" style="display: none;">
+                            <div class="dropzone-content">
+                                <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="dropzone-text-primary">Drag & drop files here</p>
+                                <p class="dropzone-text-secondary">or <span class="highlight">browse computer</span></p>
+                                <p class="dropzone-file-types">Supports: .jsonl, .json, .pdf, .docx</p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div id="upload-progress-container" class="progress-container" style="display: none;">
+                            <div class="progress-info">
+                                <span id="progress-status">Uploading...</span>
+                                <span id="progress-percent">0%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                            </div>
+                        </div>
+
+                        <div id="file-list-container" class="file-list-container" style="display: none;">
+                            <h3>Uploaded Files</h3>
+                            <ul id="file-list" class="file-list"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters & Controls Card -->
+                <div class="card glass mt-4">
+                    <div class="card-header">
+                        <h2>Top Candidates</h2>
+                        <span class="ranking-target-icon">🎯</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Slider Filter -->
+                        <div class="filter-group">
+                            <div class="ranking-value-row">
+                                <div><strong id="top-candidates-display">100</strong><span> candidates</span></div>
+                            </div>
+                            <div class="filter-label-row">
+                                <label for="top-n-slider">Top candidates:</label>
+                                <div class="filter-input-wrapper">
+                                    <input type="number" id="top-n-input" class="number-input" value="100" min="1" max="100000">
+                                </div>
+                            </div>
+                            <div class="slider-wrapper">
+                                <input type="range" id="top-n-slider" min="10" max="200" step="5" value="100" class="range-slider">
+                                <div class="slider-ticks">
+                                    <span>10</span>
+                                    <span>50</span>
+                                    <span>100</span>
+                                    <span>150</span>
+                                    <span>200+</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons mt-4">
+                            <button id="rank-btn" class="btn btn-primary w-full disabled" disabled>
+                                <span class="btn-text">Execute Ranker</span>
+                                <span class="glow-effect"></span>
+                            </button>
+                            <button id="export-btn" class="btn btn-accent w-full mt-2 disabled" disabled>
+                                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span>Export XLSX</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Candidate Listings & Stats -->
+            <div class="panel-right">
+                <!-- Stats Summary -->
+                <div class="stats-row">
+                    <div class="stat-card glass">
+                        <div class="stat-value" id="stat-total-candidates">0</div>
+                        <div class="stat-label">Total Pool</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-value" id="stat-valid-candidates">0</div>
+                        <div class="stat-label">Scorable Talent</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-value" id="stat-total-honeypots">0</div>
+                        <div class="stat-label">Dataset Honeypots</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-value" id="stat-top-100-honeypots">0</div>
+                        <div class="stat-label">Honeypots from Ranked Candidates</div>
+                    </div>
+                </div>
+
+                <!-- Table View -->
+                <div class="card glass flex-fill mt-4">
+                    <div class="card-header border-bottom">
+                        <div class="table-title-row">
+                            <h2>Top Ranked Candidates</h2>
+                            <span class="results-badge" id="results-count">0 candidates</span>
+                        </div>
+                        <div class="search-wrapper">
+                            <input type="text" id="search-bar" placeholder="Search by name, title, location..." class="search-input">
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="candidates-table" class="candidates-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-rank">Rank</th>
+                                    <th class="col-id">Candidate</th>
+                                    <th class="col-name">Name</th>
+                                    <th class="col-title">Current Title</th>
+                                    <th class="col-location">Location</th>
+                                    <th class="col-yoe">YoE</th>
+                                    <th class="col-score">Score</th>
+                                    <th class="col-action">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr>
+                                    <td colspan="8" class="table-placeholder">
+                                        <div class="placeholder-content">
+                                            <p>No candidates loaded yet. Drag and drop a dataset (JSON/JSONL) or resumes (PDF/DOCX) on the left side to get started.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Honeypot Candidate Explainability -->
+                <div id="top-100-honeypots-card" class="card glass mt-4 honeypot-top100-card" style="display: none;">
+                    <div class="card-header border-bottom">
+                        <div class="table-title-row">
+                            <h2>Honeypot Candidates</h2>
+                            <span class="results-badge risk-summary-badge" id="top-100-honeypots-count">0 candidates</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="top-100-honeypots-list" class="top100-honeypot-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Details Modal -->
+    <div id="details-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modal-candidate-name">Jane Doe</h2>
+                    <p id="modal-candidate-id" class="modal-subtitle">CAND_0000000</p>
+                </div>
+                <div class="modal-header-actions">
+                    <span id="modal-honeypot-risk-header" class="risk-badge risk-badge-large low">Honeypot Risk: Low (0)</span>
+                </div>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Top Row: Candidate overview -->
+                    <div class="modal-section-card modal-full-width overview-section-card">
+                        <h3>Overview</h3>
+                        <div class="profile-info-grid">
+                            <div><strong>Current Title:</strong> <span id="modal-title">N/A</span></div>
+                            <div><strong>Location:</strong> <span id="modal-location">N/A</span></div>
+                            <div><strong>Experience:</strong> <span id="modal-yoe">N/A</span></div>
+                            <div><strong>Honeypot Risk:</strong> <span id="modal-honeypot-risk" class="risk-badge low">Low</span></div>
+                            <div class="score-overview-row"><strong>Match Score:</strong> <div id="modal-overall-score" class="score-badge">0.00</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Full Width: Candidate Snapshot with Compact Grid -->
+                    <div class="modal-section-card modal-full-width">
+                        <h3>Candidate Snapshot</h3>
+                        <div id="modal-graph-summary" class="graph-metrics-row-compact"></div>
+                        <div id="modal-graph-container" class="candidate-chart-panel"></div>
+                    </div>
+
+                    <!-- Full width: Donut Graph Visualization -->
+                    <div class="modal-section-card modal-full-width">
+                        <h3>Skill matching</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            Donut graph categorizing semantic matches into must-have and nice-to-have JD skills:
+                        </p>
+                        <div id="bipartite-graph-container" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                            <svg id="bipartite-graph" style="width: 100%; height: 360px; border-radius: 4px;"></svg>
+                        </div>
+                        <div id="bipartite-legend" style="display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.9rem;">
+                            <div><span style="display: inline-block; width: 12px; height: 12px; background: #a78bfa; border-radius: 50%; margin-right: 0.5rem;"></span>Must-have match</div>
+                            <div><span style="display: inline-block; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; margin-right: 0.5rem;"></span>Nice-to-have match</div>
+                            <div><span style="display: inline-block; width: 12px; height: 12px; background: rgba(255,255,255,0.18); border-radius: 50%; margin-right: 0.5rem;"></span>Missing JD skill</div>
+                        </div>
+                    </div>
+
+                    <!-- Full width: Hiring Decision Insights -->
+                    <div class="modal-section-card modal-full-width">
+                        <h3>Hiring Decision Insights</h3>
+                        <div id="modal-decision-grid" class="decision-grid"></div>
+                    </div>
+
+                    <!-- Full width: Honeypot Explainability -->
+                    <div id="modal-honeypot-xai-section" class="modal-section-card modal-full-width honeypot-xai-section" style="display: none;">
+                        <h3>Honeypot Explainable AI</h3>
+                        <div id="modal-honeypot-xai" class="honeypot-xai-content"></div>
+                    </div>
+
+                    <!-- Bottom row: Reasoning -->
+                    <div class="modal-section-card modal-full-width">
+                        <h3>Fact-Grounded Reason</h3>
+                        <p id="modal-reasoning" class="reasoning-text">No reasoning generated.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/main.js?v=reference-sections-ui-3"></script>
+</body>
+</html>

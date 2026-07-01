@@ -1,0 +1,30 @@
+# Local assistant/workspace metadata
+.agents/
+.codex/
+
+# Python environments
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Python cache/build output
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Logs and temporary runtime files
+*.log
+*.err.log
+*.out.log
+uploads/
+**/uploads/
+~$*.docx
+
+# IDE/OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+.env
